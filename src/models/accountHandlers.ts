@@ -1,6 +1,23 @@
 /* eslint-disable @stylistic/max-len */
 import {db} from "../database";
 
+
+// import {dbRequestExecuter} from "./../database";
+
+// export const worktimeModel = {
+//     "getAllWorkTimeData": async () => {
+//         try {
+//             // const results = await dbRequestExecuter("SELECT * FROM [table_name]");
+//             const results = "temporary";
+//             return results;
+//         } catch (err) {
+//             console.trace(err);
+//         }
+//         return null;
+//     },
+// };
+
+
 export const getAllUsers = () => {
     return new Promise((resolve, reject) => {
         const query = "SELECT * FROM userdata";
