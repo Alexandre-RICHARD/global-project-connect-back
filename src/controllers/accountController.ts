@@ -1,11 +1,25 @@
+import {Request, Response} from "express";
+import {worktimeModel} from "../models/accountHandlers";
+
+const accountController = {
+    "getUsers": async (_req: Request, res: Response) => {
+        try {
+            const response = await worktimeModel.getAllUsersData();
+            console.log(response);
+            res.status(200).json(response);
+        } catch (error) {
+            res.status(200).json(error);
+        }
+    },
+};
+
+export default accountController;
+
 /* eslint-disable max-lines */
 /* eslint-disable @stylistic/max-len */
 // const accountHandler = require("../models/accountHandler");
 // const bcrypt = require("bcryptjs");
 // const salt = bcrypt.genSaltSync(10);
-
-
-// import {Request, Response} from "express";
 
 // import {worktimeModel} from "./../models/main";
 

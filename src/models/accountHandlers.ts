@@ -1,42 +1,38 @@
-/* eslint-disable @stylistic/max-len */
-import {db} from "../database";
+import {dbRequestExecuter} from "./../database";
 
-
-// import {dbRequestExecuter} from "./../database";
-
-// export const worktimeModel = {
-//     "getAllWorkTimeData": async () => {
-//         try {
-//             // const results = await dbRequestExecuter("SELECT * FROM [table_name]");
-//             const results = "temporary";
-//             return results;
-//         } catch (err) {
-//             console.trace(err);
-//         }
-//         return null;
-//     },
-// };
-
-
-export const getAllUsers = () => {
-    return new Promise((resolve, reject) => {
-        const query = "SELECT * FROM userdata";
-
-        db.query(query, (err, results) => {
-            if (err) {
-                console.error("Erreur :", err);
-                reject(err);
-            } else {
-                resolve(results);
-            }
-        });
-    });
+export const worktimeModel = {
+    "getAllUsersData": async () => {
+        try {
+            const results = await dbRequestExecuter("SELECT * FROM user_data");
+            return results;
+        } catch (err) {
+            console.trace(err);
+        }
+        return null;
+    },
 };
+
+
+// export const getAllUsers = () => {
+//     return new Promise((resolve, reject) => {
+//         const query = "SELECT * FROM userdata";
+
+//         db.query(query, (err, results) => {
+//             if (err) {
+//                 console.error("Erreur :", err);
+//                 reject(err);
+//             } else {
+//                 resolve(results);
+//             }
+//         });
+//     });
+// };
 
 
 // const db = require("../database.js");
 
-// // Notre fichier qui est appelé par le account controller chargé de faire les requêtes liées
+// // Notre fichier qui est appelé par le account
+// controller chargé de faire les requêtes liées
 // const accountHandler = {
 //     async getOneAccount (mail) {
 //         const sql = `

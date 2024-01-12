@@ -1,0 +1,4 @@
+@baseUrl = http://localhost:3000
+
+### Récupérer toutes les données liées au Worktime de tous les projets
+GET {{baseUrl}}/users/all HTTP/1.1
