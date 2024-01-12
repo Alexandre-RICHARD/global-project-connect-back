@@ -38,7 +38,7 @@ export const accountController = {
         }
 
         if (registerResponse.length === 0) {
-            let account = [];
+            let account = null;
             try {
                 account = await getAccountWithMail(mail);
             } catch (error) {
@@ -73,29 +73,27 @@ export const accountController = {
     "connection": async (_req: Request, res: Response) => {
         const {mail, password} = _req.body;
 
-        // ! TODO
+        let account = null;
         try {
-            const tryFindAccount = (
-                await accountHandler.getOneAccount(mail)
-            )[0];
-            if (
-                tryFindAccount &&
-                bcrypt.compareSync(password, tryFindAccount.password_hashed) ===
-                    true
-            ) {
+            account = await getAccountWithMail(mail);
+        } catch (error) {
+            res.status(500).json(["server-error"]);
+            return;
+        }
+
+        if (account) {
+            if (bcrypt.compareSync(password, account.password_hashed)) {
                 const result = {
-                    "nickname": tryFindAccount.nickname,
-                    "mail": tryFindAccount.mail,
+                    "nickname": account.nickname,
+                    "mail": account.mail,
                 };
                 res.status(200).json([
                     "login-success",
                     result
                 ]);
-            } else {
-                res.status(200).json(["login-failed"]);
             }
-        } catch (error) {
-            res.status(500).json(["server-error"]);
+        } else {
+            res.status(200).json(["login-failed"]);
         }
     },
     "changeMail": async (_req: Request, res: Response) => {
@@ -112,52 +110,47 @@ export const accountController = {
             newMailResponse.push("match-mail");
         }
 
-        // ! TODO
+        let account = null;
         if (newMailResponse.length === 0) {
             try {
-                const findGoodAccount = (
-                    await accountHandler.getOneAccount(currentMail)
-                )[0];
-                if (findGoodAccount) {
-                    if (
-                        bcrypt.compareSync(
-                            password,
-                            findGoodAccount.password_hashed
-                        )
-                    ) {
-                        try {
-                            if (
-                                !(
-                                    await accountHandler.getOneAccount(newMail)
-                                )[0]
-                            ) {
-                                const result = (
-                                    await accountHandler.changmail(
-                                        findGoodAccount.id,
-                                        newMail
-                                    )
-                                )[0];
-                                res.status(200).json([
-                                    "change-mail-success",
-                                    result
-                                ]);
-                            } else {
-                                res.status(200).json(["account-already-exist"]);
-                            }
-                        } catch (error) {
-                            res.status(500).json(["server-error"]);
-                        }
-                    } else {
-                        res.status(200).json(["wrong-password"]);
-                    }
-                } else {
-                    res.status(200).json(["mail-error"]);
-                }
+                account = await getAccountWithMail(currentMail);
             } catch (error) {
                 res.status(500).json(["server-error"]);
+                return;
             }
         } else {
             res.status(200).json(newMailResponse);
+            return;
+        }
+
+        const changeMail = async (accountId: number) => {
+            const newMailAccount = await getAccountWithMail(newMail);
+
+            if (!newMailAccount) {
+                res.status(200).json(["account-already-exist"]);
+            } else {
+                const result = (
+                    await accountHandler.changmail(accountId, newMail)
+                )[0];
+                res.status(200).json([
+                    "change-mail-success",
+                    result
+                ]);
+            }
+        };
+
+        if (account) {
+            if (bcrypt.compareSync(password, account.password_hashed)) {
+                try {
+                    await changeMail(account.id);
+                } catch (error) {
+                    res.status(500).json(["server-error"]);
+                }
+            } else {
+                res.status(200).json(["wrong-password"]);
+            }
+        } else {
+            res.status(200).json(["mail-error"]);
         }
     },
     "changePassword": async (_req: Request, res: Response) => {
@@ -180,75 +173,70 @@ export const accountController = {
             newPasswordResponse.push("match-password");
         }
 
-        // ! TODO
+        let account = null;
         if (newPasswordResponse.length === 0) {
             try {
-                const findGoodAccount = (
-                    await accountHandler.getOneAccount(mail)
-                )[0];
-                if (findGoodAccount) {
-                    if (
-                        bcrypt.compareSync(
-                            oldPassword,
-                            findGoodAccount.password_hashed
-                        )
-                    ) {
-                        try {
-                            const result = (
-                                await accountHandler.changePassword(
-                                    findGoodAccount.id,
-                                    await bcrypt.hash(newPassword, salt)
-                                )
-                            )[0];
-                            res.status(200).json([
-                                "change-password-success",
-                                result
-                            ]);
-                        } catch (error) {
-                            res.status(500).json(["server-error"]);
-                        }
-                    } else {
-                        res.status(200).json(["wrong-password"]);
-                    }
-                } else {
-                    res.status(200).json(["mail-error"]);
-                }
+                account = await getAccountWithMail(mail);
             } catch (error) {
                 res.status(500).json(["server-error"]);
+                return;
             }
         } else {
             res.status(200).json(newPasswordResponse);
+            return;
+        }
+
+        const changePassword = async (accountId: number) => {
+            const result = (
+                await accountHandler.changePassword(
+                    accountId,
+                    await bcrypt.hash(newPassword, salt)
+                )
+            )[0];
+            res.status(200).json([
+                "change-password-success",
+                result
+            ]);
+        };
+
+        if (account) {
+            if (bcrypt.compareSync(oldPassword, account.password_hashed)) {
+                try {
+                    changePassword(account.id);
+                } catch (error) {
+                    res.status(500).json(["server-error"]);
+                }
+            } else {
+                res.status(200).json(["wrong-password"]);
+            }
+        } else {
+            res.status(200).json(["mail-error"]);
         }
     },
     "deleteAccount": async (_req: Request, res: Response) => {
-        const {mail, deleteAccountPassword} = _req.body;
+        const {mail, password} = _req.body;
 
-        // ! TODO
+        let account = null;
         try {
-            const findGoodAccount = (
-                await accountHandler.getOneAccount(mail)
-            )[0];
-            if (findGoodAccount) {
-                if (
-                    bcrypt.compareSync(
-                        deleteAccountPassword,
-                        findGoodAccount.password_hashed
-                    )
-                ) {
-                    try {
-                        await accountHandler.deleteAccount(mail);
-                        res.status(200).json(["delete-account-success"]);
-                    } catch (error) {
-                        res.status(500).json(["server-error"]);
-                    }
-                } else {
-                    res.status(200).json(["wrong-password"]);
-                }
-            } else {
-                res.status(200).json(["mail-error"]);
-            }
+            account = await getAccountWithMail(mail);
         } catch (error) {
             res.status(500).json(["server-error"]);
+            return;
+        }
+
+        if (account) {
+            if (bcrypt.compareSync(password, account.password_hashed)) {
+                try {
+                    await accountHandler.deleteAccount(mail);
+                    res.status(200).json(["delete-account-success"]);
+                } catch (error) {
+                    res.status(500).json(["server-error"]);
+                }
+            } else {
+                res.status(200).json(["wrong-password"]);
+            }
+        } else {
+            res.status(200).json(["mail-error"]);
         }
     },
 };

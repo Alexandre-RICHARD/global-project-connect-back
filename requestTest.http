@@ -20,7 +20,7 @@ Content-Type: application/json
 
 {
     "mail": "truc@gmail.com",
-    "deleteAccountPassword": "au4uqbf11-C-J"
+    "password": "au4uqbf11-C-J"
 }
 
 ### Test de connexion

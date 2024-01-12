@@ -24,7 +24,6 @@ export const regexTest = {
         return null;
     },
     "testPassword": (password: string) => {
-
         const passwordRegex =
             // eslint-disable-next-line @stylistic/max-len
             /^(?=(?:[^a-z]*[a-z]){2,})(?=(?:[^\d]*\d){2,})(?=(?:[^A-Z]*[A-Z]){2,})(?=(?:[^\W_]*[\W_]){1,})[a-zA-Z\d~!@#$%^&*()-_=+[\]{};:,.<>/?|]{8,60}$/;
