@@ -1,10 +1,10 @@
-/* eslint-disable max-depth */
 /* eslint-disable max-lines */
 
 import {Request, Response} from "express";
 import bcrypt from "bcryptjs";
 
 import {accountHandler} from "../models/accountHandlers";
+import {regexTest} from "./../utilities/regexTest";
 
 const salt = bcrypt.genSaltSync(10);
 
@@ -24,48 +24,25 @@ export const accountController = {
             mail, nickname, password, passwordConfirmation,
         } = _req.body;
 
-        const regexTest = () => {
-            if (!mail.match(/.+@.+\..+/gm)) {
-                registerResponse.push("format-mail");
-            }
+        if (regexTest.testMail(mail)) {
+            registerResponse.push("format-mail");
+        }
 
-            if (
-                !(
-                    !nickname.match(/[^0-9a-zA-Z-_]/gm) &&
-                    nickname.length >= 3 &&
-                    nickname.length <= 25
-                )
-            ) {
-                registerResponse.push("format-nickname");
-            }
+        if (regexTest.testNickname(nickname)) {
+            registerResponse.push("format-nickname");
+        }
 
-            try {
-                if (
-                    !(
-                        password.match(/([a-z])/g).join("").length >= 2 &&
-                        password.match(/([A-Z])/g).join("").length >= 2 &&
-                        password.match(/([0-9])/g).join("").length >= 2 &&
-                        password
-                            .match(/([~!@#$%^&*()\-_=+[\]{};:,.<>/?\\|])/g)
-                            .join("").length >= 1 &&
-                        !password.match(/([\s\b\n\t])/g) &&
-                        password.length >= 8 &&
-                        password.length <= 60
-                    )
-                ) {
-                    registerResponse.push("format-password");
-                }
-            } catch {
-                registerResponse.push("format-password");
-            }
+        if (regexTest.testPassword(password)) {
+            registerResponse.push("format-password");
+        }
 
-            if (password !== passwordConfirmation) {
-                registerResponse.push("match-password");
-            }
-        };
+        if (
+            regexTest.testPasswordConfirmation(password, passwordConfirmation)
+        ) {
+            registerResponse.push("match-password");
+        }
 
-        regexTest();
-
+        // ! TODO
         if (registerResponse.length === 0) {
             try {
                 if (!(await accountHandler.getOneAccount(mail))[0]) {
@@ -96,65 +73,31 @@ export const accountController = {
         }
     },
     "connection": async (_req: Request, res: Response) => {
-        const loginResponse: string[] = [];
         const {mail, password} = _req.body;
 
-        const regexTest = () => {
-            if (!mail.match(/.+@.+\..+/gm)) {
-                loginResponse.push("format-mail");
+        // ! TODO
+        try {
+            const tryFindAccount = (
+                await accountHandler.getOneAccount(mail)
+            )[0];
+            if (
+                tryFindAccount &&
+                bcrypt.compareSync(password, tryFindAccount.password_hashed) ===
+                    true
+            ) {
+                const result = {
+                    "nickname": tryFindAccount.nickname,
+                    "mail": tryFindAccount.mail,
+                };
+                res.status(200).json([
+                    "login-success",
+                    result
+                ]);
+            } else {
+                res.status(200).json(["login-failed"]);
             }
-
-            try {
-                if (
-                    !(
-                        password.match(/([a-z])/g).join("").length >= 2 &&
-                        password.match(/([A-Z])/g).join("").length >= 2 &&
-                        password.match(/([0-9])/g).join("").length >= 2 &&
-                        password
-                            .match(/([~!@#$%^&*()\-_=+[\]{};:,.<>/?\\|])/g)
-                            .join("").length >= 1 &&
-                        !password.match(/([\s\b\n\t])/g) &&
-                        password.length >= 8 &&
-                        password.length <= 60
-                    )
-                ) {
-                    loginResponse.push("format-password");
-                }
-            } catch {
-                loginResponse.push("format-password");
-            }
-        };
-
-        regexTest();
-
-        if (loginResponse.length === 0) {
-            try {
-                const tryFindAccount = (
-                    await accountHandler.getOneAccount(mail)
-                )[0];
-                if (
-                    tryFindAccount &&
-                    bcrypt.compareSync(
-                        password,
-                        tryFindAccount.password_hashed
-                    ) === true
-                ) {
-                    const result = {
-                        "nickname": tryFindAccount.nickname,
-                        "mail": tryFindAccount.mail,
-                    };
-                    res.status(200).json([
-                        "login-success",
-                        result
-                    ]);
-                } else {
-                    res.status(200).json(["login-failed"]);
-                }
-            } catch (error) {
-                res.status(500).json(["server-error"]);
-            }
-        } else {
-            res.status(200).json(loginResponse);
+        } catch (error) {
+            res.status(500).json(["server-error"]);
         }
     },
     "changeMail": async (_req: Request, res: Response) => {
@@ -163,38 +106,15 @@ export const accountController = {
             currentMail, newMail, newMailConfirmation, password,
         } = _req.body;
 
-        const regexTest = () => {
-            if (!newMail.match(/.+@.+\..+/gm)) {
-                newMailResponse.push("format-mail");
-            }
+        if (regexTest.testMail(newMail)) {
+            newMailResponse.push("format-mail");
+        }
 
-            if (newMail !== newMailConfirmation) {
-                newMailResponse.push("match-mail");
-            }
+        if (regexTest.testMailConfirmation(newMail, newMailConfirmation)) {
+            newMailResponse.push("match-mail");
+        }
 
-            try {
-                if (
-                    !(
-                        password.match(/([a-z])/g).join("").length >= 2 &&
-                        password.match(/([A-Z])/g).join("").length >= 2 &&
-                        password.match(/([0-9])/g).join("").length >= 2 &&
-                        password
-                            .match(/([~!@#$%^&*()\-_=+[\]{};:,.<>/?\\|])/g)
-                            .join("").length >= 1 &&
-                        !password.match(/([\s\b\n\t])/g) &&
-                        password.length >= 8 &&
-                        password.length <= 60
-                    )
-                ) {
-                    newMailResponse.push("format-password");
-                }
-            } catch {
-                newMailResponse.push("format-password");
-            }
-        };
-
-        regexTest();
-
+        // ! TODO
         if (newMailResponse.length === 0) {
             try {
                 const findGoodAccount = (
@@ -249,54 +169,20 @@ export const accountController = {
         } =
             _req.body;
 
-        const regexTest = () => {
-            try {
-                if (
-                    !(
-                        oldPassword.match(/([a-z])/g).join("").length >= 2 &&
-                        oldPassword.match(/([A-Z])/g).join("").length >= 2 &&
-                        oldPassword.match(/([0-9])/g).join("").length >= 2 &&
-                        oldPassword
-                            .match(/([~!@#$%^&*()\-_=+[\]{};:,.<>/?\\|])/g)
-                            .join("").length >= 1 &&
-                        !oldPassword.match(/([\s\b\n\t])/g) &&
-                        oldPassword.length >= 8 &&
-                        oldPassword.length <= 60
-                    )
-                ) {
-                    newPasswordResponse.push("format-password-one");
-                }
-            } catch {
-                newPasswordResponse.push("format-password-one");
-            }
+        if (regexTest.testPassword(newPassword)) {
+            newPasswordResponse.push("format-password-two");
+        }
 
-            try {
-                if (
-                    !(
-                        newPassword.match(/([a-z])/g).join("").length >= 2 &&
-                        newPassword.match(/([A-Z])/g).join("").length >= 2 &&
-                        newPassword.match(/([0-9])/g).join("").length >= 2 &&
-                        newPassword
-                            .match(/([~!@#$%^&*()\-_=+[\]{};:,.<>/?\\|])/g)
-                            .join("").length >= 1 &&
-                        !newPassword.match(/([\s\b\n\t])/g) &&
-                        newPassword.length >= 8 &&
-                        newPassword.length <= 60
-                    )
-                ) {
-                    newPasswordResponse.push("format-password-two");
-                }
-            } catch {
-                newPasswordResponse.push("format-password-two");
-            }
+        if (
+            regexTest.testPasswordConfirmation(
+                newPassword,
+                newPasswordConfirmation
+            )
+        ) {
+            newPasswordResponse.push("match-password");
+        }
 
-            if (newPassword !== newPasswordConfirmation) {
-                newPasswordResponse.push("match-password");
-            }
-        };
-
-        regexTest();
-
+        // ! TODO
         if (newPasswordResponse.length === 0) {
             try {
                 const findGoodAccount = (
@@ -337,65 +223,34 @@ export const accountController = {
         }
     },
     "deleteAccount": async (_req: Request, res: Response) => {
-        const newPasswordResponse: string[] = [];
         const {mail, deleteAccountPassword} = _req.body;
 
-        const regexTest = () => {
-            try {
+        // ! TODO
+        try {
+            const findGoodAccount = (
+                await accountHandler.getOneAccount(mail)
+            )[0];
+            if (findGoodAccount) {
                 if (
-                    !(
-                        deleteAccountPassword.match(/([a-z])/g).join("")
-                            .length >= 2 &&
-                        deleteAccountPassword.match(/([A-Z])/g).join("")
-                            .length >= 2 &&
-                        deleteAccountPassword.match(/([0-9])/g).join("")
-                            .length >= 2 &&
-                        deleteAccountPassword
-                            .match(/([~!@#$%^&*()\-_=+[\]{};:,.<>/?\\|])/g)
-                            .join("").length >= 1 &&
-                        !deleteAccountPassword.match(/([\s\b\n\t])/g) &&
-                        deleteAccountPassword.length >= 8 &&
-                        deleteAccountPassword.length <= 60
+                    bcrypt.compareSync(
+                        deleteAccountPassword,
+                        findGoodAccount.password_hashed
                     )
                 ) {
-                    newPasswordResponse.push("format-password");
-                }
-            } catch {
-                newPasswordResponse.push("format-password");
-            }
-        };
-
-        regexTest();
-
-        if (newPasswordResponse.length === 0) {
-            try {
-                const findGoodAccount = (
-                    await accountHandler.getOneAccount(mail)
-                )[0];
-                if (findGoodAccount) {
-                    if (
-                        bcrypt.compareSync(
-                            deleteAccountPassword,
-                            findGoodAccount.password_hashed
-                        )
-                    ) {
-                        try {
-                            await accountHandler.deleteAccount(mail);
-                            res.status(200).json(["delete-account-success"]);
-                        } catch (error) {
-                            res.status(500).json(["server-error"]);
-                        }
-                    } else {
-                        res.status(200).json(["wrong-password"]);
+                    try {
+                        await accountHandler.deleteAccount(mail);
+                        res.status(200).json(["delete-account-success"]);
+                    } catch (error) {
+                        res.status(500).json(["server-error"]);
                     }
                 } else {
-                    res.status(200).json(["mail-error"]);
+                    res.status(200).json(["wrong-password"]);
                 }
-            } catch (error) {
-                res.status(500).json(["server-error"]);
+            } else {
+                res.status(200).json(["mail-error"]);
             }
-        } else {
-            res.status(200).json(newPasswordResponse);
+        } catch (error) {
+            res.status(500).json(["server-error"]);
         }
     },
 };
