@@ -6,7 +6,6 @@ import {accountController} from "./controllers/accountController";
 const router = createRouter();
 
 // Here will be all our routes
-router.get("/user/all", accountController.getUsers);
 router.post("/registration", accountController.registration);
 router.post("/connection", accountController.connection);
 router.post("/account/change/mail", accountController.changeMail);

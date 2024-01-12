@@ -8,16 +8,11 @@ import {regexTest} from "./../utilities/regexTest";
 
 const salt = bcrypt.genSaltSync(10);
 
+const getAccountWithMail = async (mail: string) => {
+    return (await accountHandler.getOneAccount(mail))[0];
+};
+
 export const accountController = {
-    "getUsers": async (_req: Request, res: Response) => {
-        try {
-            const response = await accountHandler.getAllUsersData();
-            console.log(response);
-            res.status(200).json(response);
-        } catch (error) {
-            res.status(200).json(error);
-        }
-    },
     "registration": async (_req: Request, res: Response) => {
         const registerResponse: string[] = [];
         const {
@@ -42,31 +37,34 @@ export const accountController = {
             registerResponse.push("match-password");
         }
 
-        // ! TODO
         if (registerResponse.length === 0) {
+            let account = [];
             try {
-                if (!(await accountHandler.getOneAccount(mail))[0]) {
-                    const hashedPassword = await bcrypt.hash(password, salt);
-                    try {
-                        const result = (
-                            await accountHandler.registerNewUser(
-                                nickname,
-                                mail,
-                                hashedPassword
-                            )
-                        )[0];
-                        res.status(201).json([
-                            "register-success",
-                            result
-                        ]);
-                    } catch (error) {
-                        res.status(500).json(["server-error"]);
-                    }
-                } else {
-                    res.status(200).json(["account-already-exist"]);
-                }
+                account = await getAccountWithMail(mail);
             } catch (error) {
                 res.status(500).json(["server-error"]);
+                return;
+            }
+
+            if (!account) {
+                const hashedPassword = await bcrypt.hash(password, salt);
+                try {
+                    const result = (
+                        await accountHandler.registerNewUser(
+                            nickname,
+                            mail,
+                            hashedPassword
+                        )
+                    )[0];
+                    res.status(201).json([
+                        "register-success",
+                        result
+                    ]);
+                } catch (error) {
+                    res.status(500).json(["server-error"]);
+                }
+            } else {
+                res.status(200).json(["account-already-exist"]);
             }
         } else {
             res.status(200).json(registerResponse);

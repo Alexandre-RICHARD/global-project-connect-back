@@ -1,27 +1,14 @@
 import {dbRequestExecuter as db} from "./../database";
 
 export const accountHandler = {
-    "getAllUsersData": async () => {
-        const request = `
-            SELECT * FROM user_data
-        `;
-
-        try {
-            const results = await db(request);
-            return results;
-        } catch (err) {
-            console.trace(err);
-        }
-        return null;
-    },
     "getOneAccount": async (mail: string) => {
         const request = `
-            SELECT * FROM userdata WHERE mail = ?
+            SELECT * FROM user_data WHERE mail = ?
         `;
         const parameters = [mail];
 
-        const {rows} = await db(request, parameters);
-        return rows;
+        const result = await db(request, parameters);
+        return result;
     },
     "registerNewUser": async (
         nickname: string,
@@ -30,7 +17,7 @@ export const accountHandler = {
     ) => {
         const request = `
         INSERT INTO
-            userdata
+            user_data
             (
                 nickname,
                 mail,
@@ -49,12 +36,12 @@ export const accountHandler = {
             mail,
             password
         ];
-        const {rows} = await db(request, parameters);
-        return rows;
+        const result = await db(request, parameters);
+        return result;
     },
     "changmail": async (id: number, mail: string) => {
         const request = `
-        UPDATE userdata SET mail = ? WHERE id = ?
+        UPDATE user_data SET mail = ? WHERE id = ?
         RETURNING nickname, mail;
         `;
         const parameters = [
@@ -62,12 +49,12 @@ export const accountHandler = {
             mail
         ];
 
-        const {rows} = await db(request, parameters);
-        return rows;
+        const result = await db(request, parameters);
+        return result;
     },
     "changePassword": async (id: number, password: string) => {
         const request = `
-        UPDATE userdata SET password_hashed = ? WHERE id = ?
+        UPDATE user_data SET password_hashed = ? WHERE id = ?
         RETURNING nickname, mail;
         `;
         const parameters = [
@@ -75,16 +62,16 @@ export const accountHandler = {
             password
         ];
 
-        const {rows} = await db(request, parameters);
-        return rows;
+        const result = await db(request, parameters);
+        return result;
     },
     "deleteAccount": async (mail: string) => {
         const request = `
-            DELETE FROM userdata WHERE mail = ?
+            DELETE FROM user_data WHERE mail = ?
         `;
         const parameters = [mail];
 
-        const {rows} = await db(request, parameters);
-        return rows;
+        const result = await db(request, parameters);
+        return result;
     },
 };
