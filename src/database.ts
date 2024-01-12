@@ -14,11 +14,14 @@ const pool = mariadb.createPool({
     "database": process.env.DB_DATABASE,
 });
 
-export const dbRequestExecuter = async (query: string) => {
+export const dbRequestExecuter = async (
+    query: string,
+    params: unknown[] = []
+) => {
     let db = null;
     try {
         db = await pool.getConnection();
-        const result = await db.query(query);
+        const result = await db.query(query, params);
         return result;
     } finally {
         if (db) db.release();

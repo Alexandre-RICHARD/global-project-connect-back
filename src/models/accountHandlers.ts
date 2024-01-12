@@ -1,179 +1,90 @@
-/* eslint-disable @stylistic/max-len */
+import {dbRequestExecuter as db} from "./../database";
 
-import {dbRequestExecuter} from "./../database";
-
-export const worktimeModel = {
+export const accountHandler = {
     "getAllUsersData": async () => {
+        const request = `
+            SELECT * FROM user_data
+        `;
+
         try {
-            const results = await dbRequestExecuter("SELECT * FROM user_data");
+            const results = await db(request);
             return results;
         } catch (err) {
             console.trace(err);
         }
         return null;
     },
+    "getOneAccount": async (mail: string) => {
+        const request = `
+            SELECT * FROM userdata WHERE mail = ?
+        `;
+        const parameters = [mail];
+
+        const {rows} = await db(request, parameters);
+        return rows;
+    },
+    "registerNewUser": async (
+        nickname: string,
+        mail: string,
+        password: string
+    ) => {
+        const request = `
+        INSERT INTO
+            userdata
+            (
+                nickname,
+                mail,
+                password_hashed
+            )
+            VALUES
+            (
+                ?,
+                ?,
+                ?
+            )
+            RETURNING nickname, mail;
+        `;
+        const parameters = [
+            nickname,
+            mail,
+            password
+        ];
+        const {rows} = await db(request, parameters);
+        return rows;
+    },
+    "changmail": async (id: number, mail: string) => {
+        const request = `
+        UPDATE userdata SET mail = ? WHERE id = ?
+        RETURNING nickname, mail;
+        `;
+        const parameters = [
+            id,
+            mail
+        ];
+
+        const {rows} = await db(request, parameters);
+        return rows;
+    },
+    "changePassword": async (id: number, password: string) => {
+        const request = `
+        UPDATE userdata SET password_hashed = ? WHERE id = ?
+        RETURNING nickname, mail;
+        `;
+        const parameters = [
+            id,
+            password
+        ];
+
+        const {rows} = await db(request, parameters);
+        return rows;
+    },
+    "deleteAccount": async (mail: string) => {
+        const request = `
+            DELETE FROM userdata WHERE mail = ?
+        `;
+        const parameters = [mail];
+
+        const {rows} = await db(request, parameters);
+        return rows;
+    },
 };
-
-// export const getAllUsers = () => {
-//     return new Promise((resolve, reject) => {
-//         const query = "SELECT * FROM userdata";
-
-//         db.query(query, (err, results) => {
-//             if (err) {
-//                 console.error("Erreur :", err);
-//                 reject(err);
-//             } else {
-//                 resolve(results);
-//             }
-//         });
-//     });
-// };
-
-// const db = require("../database.js");
-
-// // Notre fichier qui est appelé par le account
-// controller chargé de faire les requêtes liées
-// const accountHandler = {
-//     async getOneAccount (mail) {
-//         const sql = `
-//             SELECT * FROM userdata WHERE mail = $1
-//         `;
-
-//         const parameters = [mail];
-
-//         const {rows} = await db.query(sql, parameters);
-//         return rows;
-//     },
-
-//     async registerNewUser (nickname, mail, password) {
-//         const sql = `
-//         INSERT INTO
-//             userdata
-//             (
-//                 nickname,
-//                 mail,
-//                 password_hashed
-//             )
-//             VALUES
-//             (
-//                 $1,
-//                 $2,
-//                 $3
-//             )
-//             RETURNING nickname, mail;
-//         `;
-//         const parameters = [
-//             nickname,
-//             mail,
-//             password
-//         ];
-//         const {rows} = await db.query(sql, parameters);
-//         return rows;
-//     },
-
-//     async changmail (id, mail) {
-//         const sql = `
-//         UPDATE userdata SET mail = $2 WHERE id = $1
-//         RETURNING nickname, mail;
-//         `;
-//         const parameters = [
-//             id,
-//             mail
-//         ];
-//         const {rows} = await db.query(sql, parameters);
-//         return rows;
-//     },
-
-//     async changePassword (id, password) {
-//         const sql = `
-//         UPDATE userdata SET password_hashed = $2 WHERE id = $1
-//         RETURNING nickname, mail;
-//         `;
-//         const parameters = [
-//             id,
-//             password
-//         ];
-//         const {rows} = await db.query(sql, parameters);
-//         return rows;
-//     },
-
-//     async deleteAccount (mail) {
-//         const sql = `
-//             DELETE FROM userdata WHERE mail = $1
-//         `;
-//         const parameters = [mail];
-//         const {rows} = await db.query(sql, parameters);
-//         return rows;
-//     },
-// };
-
-// module.exports = accountHandler;
-
-// const db = require("../database.js");
-
-// // Notre fichier qui est appelé par le account controller chargé de faire les requêtes liées
-// const accountHandler = {
-//     async getOneAccount(mail) {
-//         const sql = `
-//             SELECT * FROM userdata WHERE mail = $1
-//         `;
-
-//         const parameters = [mail];
-
-//         const { rows } = await db.query(sql, parameters);
-//         return rows;
-//     },
-
-//     async registerNewUser(nickname, mail, password) {
-//         const sql = `
-//         INSERT INTO
-//             userdata
-//             (
-//                 nickname,
-//                 mail,
-//                 password_hashed
-//             )
-//             VALUES
-//             (
-//                 $1,
-//                 $2,
-//                 $3
-//             )
-//             RETURNING nickname, mail;
-//         `;
-//         const parameters = [nickname, mail, password];
-//         const { rows } = await db.query(sql, parameters);
-//         return rows;
-//     },
-
-//     async changmail(id, mail) {
-//         const sql = `
-//         UPDATE userdata SET mail = $2 WHERE id = $1
-//         RETURNING nickname, mail;
-//         `;
-//         const parameters = [id, mail];
-//         const { rows } = await db.query(sql, parameters);
-//         return rows;
-//     },
-
-//     async changePassword(id, password) {
-//         const sql = `
-//         UPDATE userdata SET password_hashed = $2 WHERE id = $1
-//         RETURNING nickname, mail;
-//         `;
-//         const parameters = [id, password];
-//         const { rows } = await db.query(sql, parameters);
-//         return rows;
-//     },
-
-//     async deleteAccount(mail) {
-//         const sql = `
-//             DELETE FROM userdata WHERE mail = $1
-//         `;
-//         const parameters = [mail];
-//         const { rows } = await db.query(sql, parameters);
-//         return rows;
-//     },
-// };
-
-// module.exports = accountHandler;
