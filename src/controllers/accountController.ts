@@ -12,6 +12,10 @@ const getAccountWithMail = async (mail: string) => {
     return (await accountHandler.getOneAccount(mail))[0];
 };
 
+const getAccountWithNickname = async (nickname: string) => {
+    return (await accountHandler.getOneAccount(nickname))[0];
+};
+
 export const accountController = {
     "registration": async (_req: Request, res: Response) => {
         const registerResponse: string[] = [];
@@ -38,15 +42,17 @@ export const accountController = {
         }
 
         if (registerResponse.length === 0) {
-            let account = null;
+            let accountM = null;
+            let accountN = null;
             try {
-                account = await getAccountWithMail(mail);
+                accountM = await getAccountWithMail(mail);
+                accountM = await getAccountWithMail(nickname);
             } catch (error) {
                 res.status(500).json(["server-error"]);
                 return;
             }
 
-            if (!account) {
+            if (!accountM) {
                 const hashedPassword = await bcrypt.hash(password, salt);
                 try {
                     const result = (
