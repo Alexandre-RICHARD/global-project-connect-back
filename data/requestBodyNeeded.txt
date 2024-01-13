@@ -1,0 +1,47 @@
+CREATE TABLE user_data(
+   Id_user_data INT AUTO_INCREMENT,
+   nickname VARCHAR(50)  NOT NULL,
+   mail VARCHAR(100)  NOT NULL,
+   password_hashed VARCHAR(100)  NOT NULL,
+   hourly_rate DECIMAL(6,2),
+);
+
+CREATE TABLE projects(
+   Id_projects INT AUTO_INCREMENT,
+   name VARCHAR(100)  NOT NULL,
+   description VARCHAR(500)  NOT NULL,
+   color VARCHAR(8)  NOT NULL,
+   monetized BOOLEAN NOT NULL,
+   Id_user_data INT NOT NULL,
+);
+
+CREATE TABLE projects_todo(
+   Id_projects_todo INT AUTO_INCREMENT,
+   task VARCHAR(200)  NOT NULL,
+   Id_projects INT NOT NULL,
+);
+
+CREATE TABLE work_time(
+   Id_work_time INT AUTO_INCREMENT,
+   activity_date DATETIME NOT NULL,
+   length DECIMAL(7,0)   NOT NULL,
+   description VARCHAR(300)  NOT NULL,
+   Id_projects INT NOT NULL,
+);
+
+getAll
+
+get project
+add project  -> name ; desc ; color
+modify project -> id, name ; desc ; color
+supp project -> id
+
+get tasks project
+add tasks -> projectId, tasks
+modify tasks -> id, tasks
+supp taks -> id
+
+get worktime project
+add worktime -> projectId, date, length, description
+modify worktime -> id, date, length, description
+supp worktime -> id

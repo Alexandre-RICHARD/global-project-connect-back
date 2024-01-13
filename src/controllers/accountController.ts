@@ -81,17 +81,18 @@ export const accountController = {
             return;
         }
 
-        if (account) {
-            if (bcrypt.compareSync(password, account.password_hashed)) {
-                const result = {
-                    "nickname": account.nickname,
-                    "mail": account.mail,
-                };
-                res.status(200).json([
-                    "login-success",
-                    result
-                ]);
-            }
+        if (
+            account &&
+            bcrypt.compareSync(password, account.password_hashed)
+        ) {
+            const result = {
+                "nickname": account.nickname,
+                "mail": account.mail,
+            };
+            res.status(200).json([
+                "login-success",
+                result
+            ]);
         } else {
             res.status(200).json(["login-failed"]);
         }
@@ -161,7 +162,7 @@ export const accountController = {
             _req.body;
 
         if (regexTest.testPassword(newPassword)) {
-            newPasswordResponse.push("format-password-two");
+            newPasswordResponse.push("format-password-new");
         }
 
         if (
