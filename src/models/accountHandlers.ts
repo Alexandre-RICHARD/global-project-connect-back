@@ -39,30 +39,37 @@ export const accountHandler = {
         const result = await db(request, parameters);
         return result;
     },
-    "changmail": async (id: number, mail: string) => {
+    "changeMail": async (id: number, mail: string) => {
+        console.log("lol");
         const request = `
-        UPDATE user_data SET mail = ? WHERE id = ?
-        RETURNING nickname, mail;
+        UPDATE user_data SET mail = ? WHERE Id_user_data = ?;
+        SELECT nickname, mail FROM user_data WHERE Id_user_data = ?;
         `;
         const parameters = [
+            mail,
             id,
-            mail
+            id
         ];
 
+        console.log(await db(request, parameters));
         const result = await db(request, parameters);
         return result;
     },
     "changePassword": async (id: number, password: string) => {
         const request = `
-        UPDATE user_data SET password_hashed = ? WHERE id = ?
-        RETURNING nickname, mail;
+        UPDATE user_data SET password_hashed = ? WHERE Id_user_data = ?;
         `;
         const parameters = [
             id,
             password
         ];
+        await db(request, parameters);
 
-        const result = await db(request, parameters);
+        const getRequest = `
+        SELECT nickname, mail FROM user_data WHERE Id_user_data = ?;
+        `;
+        const getParameters = [id];
+        const result = await db(getRequest, getParameters);
         return result;
     },
     "deleteAccount": async (mail: string) => {

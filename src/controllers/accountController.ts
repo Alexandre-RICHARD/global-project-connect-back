@@ -126,24 +126,24 @@ export const accountController = {
 
         const changeMail = async (accountId: number) => {
             const newMailAccount = await getAccountWithMail(newMail);
-
             if (!newMailAccount) {
-                res.status(200).json(["account-already-exist"]);
-            } else {
-                const result = (
-                    await accountHandler.changmail(accountId, newMail)
-                )[0];
+                const result = await accountHandler.changeMail(
+                    accountId,
+                    newMail
+                );
                 res.status(200).json([
                     "change-mail-success",
                     result
                 ]);
+            } else {
+                res.status(200).json(["account-already-exist"]);
             }
         };
 
         if (account) {
             if (bcrypt.compareSync(password, account.password_hashed)) {
                 try {
-                    await changeMail(account.id);
+                    await changeMail(account.Id_user_data);
                 } catch (error) {
                     res.status(500).json(["server-error"]);
                 }
@@ -203,7 +203,7 @@ export const accountController = {
         if (account) {
             if (bcrypt.compareSync(oldPassword, account.password_hashed)) {
                 try {
-                    changePassword(account.id);
+                    changePassword(account.Id_user_data);
                 } catch (error) {
                     res.status(500).json(["server-error"]);
                 }
