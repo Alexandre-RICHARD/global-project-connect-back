@@ -40,36 +40,39 @@ export const accountHandler = {
         return result;
     },
     "changeMail": async (id: number, mail: string) => {
-        console.log("lol");
-        const request = `
-        UPDATE user_data SET mail = ? WHERE Id_user_data = ?;
-        SELECT nickname, mail FROM user_data WHERE Id_user_data = ?;
+        const updateRequest = `
+        UPDATE user_data SET mail = ? WHERE Id_user_data = ?
         `;
-        const parameters = [
+        const selectRequest = `
+        SELECT nickname, mail FROM user_data WHERE Id_user_data = ?
+        `;
+
+        const updateParameters = [
             mail,
-            id,
             id
         ];
+        const selectParameters = [id];
 
-        console.log(await db(request, parameters));
-        const result = await db(request, parameters);
+        await db(updateRequest, updateParameters);
+        const result = await db(selectRequest, selectParameters);
         return result;
     },
     "changePassword": async (id: number, password: string) => {
-        const request = `
-        UPDATE user_data SET password_hashed = ? WHERE Id_user_data = ?;
+        const updateRequest = `
+        UPDATE user_data SET password_hashed = ? WHERE Id_user_data = ?
         `;
-        const parameters = [
-            id,
-            password
-        ];
-        await db(request, parameters);
+        const selectRequest = `
+        SELECT nickname, mail FROM user_data WHERE Id_user_data = ?
+        `;
 
-        const getRequest = `
-        SELECT nickname, mail FROM user_data WHERE Id_user_data = ?;
-        `;
-        const getParameters = [id];
-        const result = await db(getRequest, getParameters);
+        const updateParameters = [
+            password,
+            id
+        ];
+        const selectParameters = [id];
+
+        await db(updateRequest, updateParameters);
+        const result = await db(selectRequest, selectParameters);
         return result;
     },
     "deleteAccount": async (mail: string) => {

@@ -81,10 +81,7 @@ export const accountController = {
             return;
         }
 
-        if (
-            account &&
-            bcrypt.compareSync(password, account.password_hashed)
-        ) {
+        if (account && bcrypt.compareSync(password, account.password_hashed)) {
             const result = {
                 "nickname": account.nickname,
                 "mail": account.mail,
@@ -145,6 +142,7 @@ export const accountController = {
                 try {
                     await changeMail(account.Id_user_data);
                 } catch (error) {
+                    console.log(error);
                     res.status(500).json(["server-error"]);
                 }
             } else {
