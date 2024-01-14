@@ -9,11 +9,11 @@ import {regexTest} from "./../utilities/regexTest";
 const salt = bcrypt.genSaltSync(10);
 
 const getAccountWithMail = async (mail: string) => {
-    return (await accountHandler.getOneAccount(mail))[0];
+    return (await accountHandler.getOneAccountWithMail(mail))[0];
 };
 
 const getAccountWithNickname = async (nickname: string) => {
-    return (await accountHandler.getOneAccount(nickname))[0];
+    return (await accountHandler.getOneAccountWithNickname(nickname))[0];
 };
 
 export const accountController = {
@@ -46,28 +46,32 @@ export const accountController = {
             let accountN = null;
             try {
                 accountM = await getAccountWithMail(mail);
-                accountM = await getAccountWithMail(nickname);
+                accountN = await getAccountWithNickname(nickname);
             } catch (error) {
                 res.status(500).json(["server-error"]);
                 return;
             }
 
             if (!accountM) {
-                const hashedPassword = await bcrypt.hash(password, salt);
-                try {
-                    const result = (
-                        await accountHandler.registerNewUser(
-                            nickname,
-                            mail,
-                            hashedPassword
-                        )
-                    )[0];
-                    res.status(201).json([
-                        "register-success",
-                        result
-                    ]);
-                } catch (error) {
-                    res.status(500).json(["server-error"]);
+                if (!accountN) {
+                    const hashedPassword = await bcrypt.hash(password, salt);
+                    try {
+                        const result = (
+                            await accountHandler.registerNewUser(
+                                nickname,
+                                mail,
+                                hashedPassword
+                            )
+                        )[0];
+                        res.status(201).json([
+                            "register-success",
+                            result
+                        ]);
+                    } catch (error) {
+                        res.status(500).json(["server-error"]);
+                    }
+                } else {
+                    res.status(200).json(["nickname-already-existing"]);
                 }
             } else {
                 res.status(200).json(["account-already-exist"]);

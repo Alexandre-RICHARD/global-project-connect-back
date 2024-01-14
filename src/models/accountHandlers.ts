@@ -1,11 +1,20 @@
 import {dbRequestExecuter as db} from "./../database";
 
 export const accountHandler = {
-    "getOneAccount": async (mail: string) => {
+    "getOneAccountWithMail": async (mail: string) => {
         const request = `
             SELECT * FROM user_data WHERE mail = ?
         `;
         const parameters = [mail];
+
+        const result = await db(request, parameters);
+        return result;
+    },
+    "getOneAccountWithNickname": async (nickname: string) => {
+        const request = `
+            SELECT * FROM user_data WHERE nickname = ?
+        `;
+        const parameters = [nickname];
 
         const result = await db(request, parameters);
         return result;
