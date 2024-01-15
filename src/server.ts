@@ -18,5 +18,6 @@ app.use(router);
 
 // Export of starting function
 export const start = () => app.listen(PORT, (): void => {
+    // eslint-disable-next-line no-console
     console.log(`Server works on http://localhost:${PORT}`);
 });

@@ -138,7 +138,7 @@
         "new-cap": "error",
         "no-alert": "error",
         "no-await-in-loop": "error",
-        "no-console": "off",
+        "no-console": "error",
         "no-constant-binary-expression": "error",
         "no-eval": "error",
         "no-extra-label": "error",
