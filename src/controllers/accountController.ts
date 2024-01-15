@@ -4,6 +4,7 @@ import {Request, Response} from "express";
 import bcrypt from "bcryptjs";
 
 import {accountHandler} from "../models/accountHandlers";
+import {errorSaver} from "../utilities/errorSaver";
 import {regexTest} from "./../utilities/regexTest";
 
 const salt = bcrypt.genSaltSync(10);
@@ -49,6 +50,11 @@ export const accountController = {
                 accountN = await getAccountWithNickname(nickname);
             } catch (error) {
                 res.status(500).json(["server-error"]);
+                const errorF = error as Error;
+                await errorSaver(
+                    "get-account-failed",
+                    JSON.stringify(errorF.stack)
+                );
                 return;
             }
 
@@ -69,6 +75,11 @@ export const accountController = {
                         ]);
                     } catch (error) {
                         res.status(500).json(["server-error"]);
+                        const errorF = error as Error;
+                        await errorSaver(
+                            "register-user-failed",
+                            JSON.stringify(errorF.stack)
+                        );
                     }
                 } else {
                     res.status(200).json(["nickname-already-existing"]);
@@ -88,6 +99,11 @@ export const accountController = {
             account = await getAccountWithMail(mail);
         } catch (error) {
             res.status(500).json(["server-error"]);
+            const errorF = error as Error;
+            await errorSaver(
+                "get-account-failed",
+                JSON.stringify(errorF.stack)
+            );
             return;
         }
 
@@ -124,6 +140,11 @@ export const accountController = {
                 account = await getAccountWithMail(currentMail);
             } catch (error) {
                 res.status(500).json(["server-error"]);
+                const errorF = error as Error;
+                await errorSaver(
+                    "get-account-failed",
+                    JSON.stringify(errorF.stack)
+                );
                 return;
             }
         } else {
@@ -152,8 +173,12 @@ export const accountController = {
                 try {
                     await changeMail(account.Id_user_data);
                 } catch (error) {
-                    console.log(error);
                     res.status(500).json(["server-error"]);
+                    const errorF = error as Error;
+                    await errorSaver(
+                        "change-mail-failed",
+                        JSON.stringify(errorF.stack)
+                    );
                 }
             } else {
                 res.status(200).json(["wrong-password"]);
@@ -188,6 +213,11 @@ export const accountController = {
                 account = await getAccountWithMail(mail);
             } catch (error) {
                 res.status(500).json(["server-error"]);
+                const errorF = error as Error;
+                await errorSaver(
+                    "get-account-failed",
+                    JSON.stringify(errorF.stack)
+                );
                 return;
             }
         } else {
@@ -214,6 +244,11 @@ export const accountController = {
                     changePassword(account.Id_user_data);
                 } catch (error) {
                     res.status(500).json(["server-error"]);
+                    const errorF = error as Error;
+                    await errorSaver(
+                        "change-password-failed",
+                        JSON.stringify(errorF.stack)
+                    );
                 }
             } else {
                 res.status(200).json(["wrong-password"]);
@@ -230,6 +265,11 @@ export const accountController = {
             account = await getAccountWithMail(mail);
         } catch (error) {
             res.status(500).json(["server-error"]);
+            const errorF = error as Error;
+            await errorSaver(
+                "get-account-failed",
+                JSON.stringify(errorF.stack)
+            );
             return;
         }
 
@@ -240,6 +280,11 @@ export const accountController = {
                     res.status(200).json(["delete-account-success"]);
                 } catch (error) {
                     res.status(500).json(["server-error"]);
+                    const errorF = error as Error;
+                    await errorSaver(
+                        "delete-account-failed",
+                        JSON.stringify(errorF.stack)
+                    );
                 }
             } else {
                 res.status(200).json(["wrong-password"]);

@@ -1,4 +1,5 @@
 import mariadb from "mariadb";
+import {errorSaver} from "./utilities/errorSaver";
 
 let port = 3306;
 
@@ -23,6 +24,13 @@ export const dbRequestExecuter = async (
         db = await pool.getConnection();
         const result = await db.query(query, params);
         return result;
+    } catch (error) {
+        const errorF = error as Error;
+        await errorSaver(
+            "database-use-failed",
+            JSON.stringify(errorF.stack)
+        );
+        return ["database-error"];
     } finally {
         if (db) db.release();
     }
