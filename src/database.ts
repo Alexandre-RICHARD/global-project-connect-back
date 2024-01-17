@@ -26,10 +26,7 @@ export const dbRequestExecuter = async (
         return result;
     } catch (error) {
         const errorF = error as Error;
-        await errorSaver(
-            "database-use-failed",
-            JSON.stringify(errorF.stack)
-        );
+        await errorSaver("database-use-failed", JSON.stringify(errorF.stack));
         return ["database-error"];
     } finally {
         if (db) db.release();

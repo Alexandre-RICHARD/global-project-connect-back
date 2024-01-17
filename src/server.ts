@@ -9,9 +9,15 @@ import router from "./router";
 
 const PORT = process.env.LOCAL_PORT;
 
+const corsOptions = {
+    "origin": process.env.CORS_ORIGIN?.split(" "),
+    "methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
+    "credentials": true,
+};
+
 // Create app server with express
 const app: Express = express();
-app.use(cors());
+app.use(cors(corsOptions));
 // Using json for request response
 app.use(express.json());
 app.use(router);

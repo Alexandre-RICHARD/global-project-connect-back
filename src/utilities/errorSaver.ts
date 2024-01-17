@@ -1,7 +1,4 @@
-export const errorSaver = async (
-    context: string,
-    errorMessage: string
-) => {
+export const errorSaver = async (context: string, errorMessage: string) => {
     const errorApiUrl = process.env.ERROR_API_URL;
 
     await fetch(errorApiUrl + "/error", {
@@ -11,9 +8,9 @@ export const errorSaver = async (
         },
         "method": "POST",
         "body": JSON.stringify({
-            "projectName": "global-connect-back",
+            "projectName": process.env.PROJECT_NAME,
             "context": context,
-            "errorMessage" : errorMessage,
+            "errorMessage": errorMessage,
         }),
     });
 };
