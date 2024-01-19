@@ -1,12 +1,15 @@
 import mariadb from "mariadb";
+
 import {errorSaver} from "./utilities/errorSaver";
 
 let port = 3306;
 
+// Have to handle DB_PORT here to prevent type error
 if (process.env.DB_PORT) {
     port = parseInt(process.env.DB_PORT.toString());
 }
 
+// Get all database connect parameters
 const pool = mariadb.createPool({
     "host": process.env.DB_HOST,
     "port": port,
@@ -15,6 +18,9 @@ const pool = mariadb.createPool({
     "database": process.env.DB_DATABASE,
 });
 
+// Create connexion with database and create query combining request and params
+// to avoid SQL-injection.
+// If an error occurs, it will make an api call to save it
 export const dbRequestExecuter = async (
     query: string,
     params: unknown[] = []
